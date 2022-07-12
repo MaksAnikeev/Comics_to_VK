@@ -55,7 +55,6 @@ def post_picture_to_wall(vk_access_token, vk_group_id, owner_id, media_id, comic
 
 if __name__ == '__main__':
     load_dotenv()
-    vk_id = os.environ['VK_ID']
     vk_access_token = os.environ['VK_ACCESS_TOKEN']
     vk_group_id = os.environ['VK_GROUP_ID']
 
