@@ -4,16 +4,21 @@ import random
 import requests
 from dotenv import load_dotenv
 
-from comics_helper import create_url, download_picture
+
+def download_picture(picture_url, picture_path):
+    picture_response = requests.get(picture_url)
+    picture_response.raise_for_status()
+    with open(f'{picture_path}.jpg', 'wb') as file:
+            file.write(picture_response.content)
 
 
 def upload_picture_to_server(vk_group_id, vk_access_token, picture):
+    url = 'https://api.vk.com/method/photos.getWallUploadServer'
     payload = {'group_id': vk_group_id,
                'access_token': vk_access_token,
                'v': 5.131                           # последняя версия API
                }
-    response = requests.get(create_url(method='photos.getWallUploadServer'),
-                            params=payload)
+    response = requests.get(url, params=payload)
     response.raise_for_status()
     with open(picture, 'rb') as file:
         upload_url = response.json()['response']['upload_url']
@@ -26,6 +31,7 @@ def upload_picture_to_server(vk_group_id, vk_access_token, picture):
 
 
 def upload_picture_to_album(vk_group_id, vk_access_token, params_picture):
+    url = 'https://api.vk.com/method/photos.saveWallPhoto'
     picture_in_album_payload = {'group_id': vk_group_id,
                                 'access_token': vk_access_token,
                                 'hash': params_picture['hash'],      # данные полученные от функции  upload_image_to_server
@@ -33,13 +39,13 @@ def upload_picture_to_album(vk_group_id, vk_access_token, params_picture):
                                 'server': params_picture['server'],  # данные полученные от функции  upload_image_to_server
                                 'v': 5.131                           # последняя версия API
                                 }
-    picture_in_album_response = requests.post(create_url('photos.saveWallPhoto'),
-                                              params=picture_in_album_payload)
+    picture_in_album_response = requests.post(url, params=picture_in_album_payload)
     picture_in_album_response.raise_for_status()
     return picture_in_album_response.json()['response'][0]
 
 
 def post_picture_to_wall(vk_access_token, vk_group_id, owner_id, media_id, comics_comment):
+    url = 'https://api.vk.com/method/wall.post'
     post_picture_payload = {'access_token': vk_access_token,
                             'owner_id': f'-{vk_group_id}',                 # значение должно быть со знаком "-"
                             'from_group': 1,                               # 1 - от имени группы, 0 - от имени пользователя
@@ -47,8 +53,7 @@ def post_picture_to_wall(vk_access_token, vk_group_id, owner_id, media_id, comic
                             'message': comics_comment,                     # комментарий со страницы xkcd комикса
                             'v': 5.131                                     # последняя версия API
                             }
-    post_picture_response = requests.post(create_url('wall.post'),
-                                          params=post_picture_payload)
+    post_picture_response = requests.post(url, params=post_picture_payload)
     post_picture_response.raise_for_status()
     return post_picture_response.json()
 
