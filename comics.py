@@ -20,14 +20,14 @@ def upload_picture_to_server(vk_group_id, vk_access_token, picture):
                }
     response = requests.get(url, params=payload)
     response.raise_for_status()
+    upload_url = response.json()['response']['upload_url']
     with open(picture, 'rb') as file:
-        upload_url = response.json()['response']['upload_url']
         files = {
             'photo': file,
         }
         picture_response = requests.post(upload_url, files=files)
-        picture_response.raise_for_status()
-        return picture_response.json()
+    picture_response.raise_for_status()
+    return picture_response.json()
 
 
 def upload_picture_to_album(vk_group_id, vk_access_token, params_picture):
@@ -50,7 +50,7 @@ def post_picture_to_wall(vk_access_token, vk_group_id, owner_id, media_id, comic
                             'owner_id': f'-{vk_group_id}',                 # значение должно быть со знаком "-"
                             'from_group': 1,                               # 1 - от имени группы, 0 - от имени пользователя
                             'attachments': f'photo{owner_id}_{media_id}',  # переменные берутся по результату работы функции upload_picture_to_album
-                            'message': comics_comment,                   
+                            'message': comics_comment,
                             'v': vk_api_version
                             }
     post_picture_response = requests.post(url, params=post_picture_payload)
