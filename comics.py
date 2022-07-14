@@ -67,22 +67,22 @@ if __name__ == '__main__':
     comics_page = xkcd_response.json()
     download_picture(picture_url=comics_page['img'],
                      picture_path='comics')
-
-    params_picture = upload_picture_to_server(vk_group_id,
+    try:
+        params_picture = upload_picture_to_server(vk_group_id,
                                               vk_access_token,
                                               picture='comics.jpg')
 
-    picture_page = upload_picture_to_album(vk_group_id,
+        picture_page = upload_picture_to_album(vk_group_id,
                                            vk_access_token,
                                            hash=params_picture['hash'],
                                            photo=params_picture['photo'],
                                            server=params_picture['server']
                                            )
 
-    post_picture_to_wall(vk_access_token,
+        post_picture_to_wall(vk_access_token,
                          vk_group_id,
                          owner_id=picture_page['owner_id'],
                          media_id=picture_page['id'],
                          comics_comment=comics_page['alt'])
-
-    os.remove('comics.jpg')
+    finally:
+        os.remove('comics.jpg')
