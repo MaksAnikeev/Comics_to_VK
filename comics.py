@@ -9,7 +9,7 @@ def download_picture(picture_url, picture_path):
     picture_response = requests.get(picture_url)
     picture_response.raise_for_status()
     with open(f'{picture_path}.jpg', 'wb') as file:
-            file.write(picture_response.content)
+        file.write(picture_response.content)
 
 
 def upload_picture_to_server(vk_group_id, vk_access_token, picture):
@@ -37,17 +37,23 @@ def upload_picture_to_album(vk_group_id, vk_access_token, hash, photo, server):
                                 'server': server,
                                 'v': vk_api_version
                                 }
-    picture_in_album_response = requests.post(url, params=picture_in_album_payload)
+    picture_in_album_response = requests.post(url,
+                                              params=picture_in_album_payload)
     picture_in_album_response.raise_for_status()
     return picture_in_album_response.json()['response'][0]
 
 
-def post_picture_to_wall(vk_access_token, vk_group_id, owner_id, media_id, comics_comment):
+def post_picture_to_wall(vk_access_token, vk_group_id, owner_id,
+                         media_id, comics_comment):
     url = 'https://api.vk.com/method/wall.post'
     post_picture_payload = {'access_token': vk_access_token,
-                            'owner_id': f'-{vk_group_id}',                 # значение должно быть со знаком "-"
-                            'from_group': 1,                               # 1 - от имени группы, 0 - от имени пользователя
-                            'attachments': f'photo{owner_id}_{media_id}',  # переменные берутся по результату работы функции upload_picture_to_album
+                            'owner_id': f'-{vk_group_id}',
+                            # значение должно быть со знаком "-"
+                            'from_group': 1,
+                            # 1 - от имени группы, 0 - от имени пользователя
+                            'attachments': f'photo{owner_id}_{media_id}',
+                            # переменные берутся по результату работы
+                            # функции upload_picture_to_album
                             'message': comics_comment,
                             'v': vk_api_version
                             }
@@ -69,20 +75,20 @@ if __name__ == '__main__':
                      picture_path='comics')
     try:
         params_picture = upload_picture_to_server(vk_group_id,
-                                              vk_access_token,
-                                              picture='comics.jpg')
+                                                  vk_access_token,
+                                                  picture='comics.jpg')
 
         picture_page = upload_picture_to_album(vk_group_id,
-                                           vk_access_token,
-                                           hash=params_picture['hash'],
-                                           photo=params_picture['photo'],
-                                           server=params_picture['server']
-                                           )
+                                               vk_access_token,
+                                               hash=params_picture['hash'],
+                                               photo=params_picture['photo'],
+                                               server=params_picture['server']
+                                               )
 
         post_picture_to_wall(vk_access_token,
-                         vk_group_id,
-                         owner_id=picture_page['owner_id'],
-                         media_id=picture_page['id'],
-                         comics_comment=comics_page['alt'])
+                             vk_group_id,
+                             owner_id=picture_page['owner_id'],
+                             media_id=picture_page['id'],
+                             comics_comment=comics_page['alt'])
     finally:
         os.remove('comics.jpg')
