@@ -22,21 +22,19 @@ def upload_picture_to_server(vk_group_id, vk_access_token, picture):
     response.raise_for_status()
     upload_url = response.json()['response']['upload_url']
     with open(picture, 'rb') as file:
-        files = {
-            'photo': file,
-        }
+        files = {'photo': file}
         picture_response = requests.post(upload_url, files=files)
     picture_response.raise_for_status()
     return picture_response.json()
 
 
-def upload_picture_to_album(vk_group_id, vk_access_token, params_picture):
+def upload_picture_to_album(vk_group_id, vk_access_token, hash, photo, server):
     url = 'https://api.vk.com/method/photos.saveWallPhoto'
     picture_in_album_payload = {'group_id': vk_group_id,
                                 'access_token': vk_access_token,
-                                'hash': params_picture['hash'],      # данные полученные от функции  upload_image_to_server
-                                'photo': params_picture['photo'],    # данные полученные от функции  upload_image_to_server
-                                'server': params_picture['server'],  # данные полученные от функции  upload_image_to_server
+                                'hash': hash,
+                                'photo': photo,
+                                'server': server,
                                 'v': vk_api_version
                                 }
     picture_in_album_response = requests.post(url, params=picture_in_album_payload)
@@ -70,11 +68,16 @@ if __name__ == '__main__':
     download_picture(picture_url=comics_page['img'],
                      picture_path='comics')
 
+    params_picture = upload_picture_to_server(vk_group_id,
+                                              vk_access_token,
+                                              picture='comics.jpg')
+
     picture_page = upload_picture_to_album(vk_group_id,
                                            vk_access_token,
-                                           params_picture=upload_picture_to_server(vk_group_id,
-                                                                                   vk_access_token,
-                                                                                   picture='comics.jpg'))
+                                           hash=params_picture['hash'],
+                                           photo=params_picture['photo'],
+                                           server=params_picture['server']
+                                           )
 
     post_picture_to_wall(vk_access_token,
                          vk_group_id,
